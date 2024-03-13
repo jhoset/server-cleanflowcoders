@@ -24,8 +24,8 @@ async function bootstrap() {
     .setTitle('CleanFlowCoders - API')
     .setDescription('API Description')
     .setVersion('1.0')
-    .addServer(`https://localhost:${process.env.PORT}/`, 'Local Environment')
-    .addServer('https://production.our-api.com/', 'Production')
+    .addServer(`http://localhost:${process.env.PORT}/`, 'Dev Environment')
+    .addServer(process.env.SERVER_URL, 'Production')
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api-docs', app, document);
