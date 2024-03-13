@@ -11,11 +11,7 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 import { Transform, TransformFnParams } from 'class-transformer';
-import {
-  IsValidDateFormat,
-  IsValidTimezone,
-  IsFutureDate,
-} from '../../common/validators';
+import { IsValidDateFormat, IsFutureDate } from '../../common/validators';
 import { TimezoneAdapter } from '../../common/adapters';
 
 @ValidatorConstraint({ name: 'isAfterStartDate', async: false })
@@ -54,9 +50,6 @@ export class CreateRaffleDto {
   @IsOptional()
   description: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @Validate(IsValidTimezone)
   timezone: string;
 
   @IsNotEmpty()

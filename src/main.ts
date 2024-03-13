@@ -13,14 +13,16 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
   //? DTO Validation - Trandformation Setup
-  app.useGlobalPipes(new ValidationPipe({
-    forbidNonWhitelisted: true,
-    transform: true,
+  app.useGlobalPipes(
+    new ValidationPipe({
+      forbidNonWhitelisted: true,
+      transform: true,
 
-    transformOptions: {
-      enableImplicitConversion: true
-    }
-  }))
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
 
   // Set Global Timezone from ENV
   process.env.TZ = process.env.TIMEZONE;
@@ -37,6 +39,6 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
 
   await app.listen(process.env.PORT);
-  console.log(`>>> App Running on port ${process.env.PORT}`)
+  console.log(`>>> App Running on port ${process.env.PORT}`);
 }
 bootstrap();

@@ -23,9 +23,9 @@ model Raffle {
   id                   Int      @id @default(autoincrement())
   name                 String
   description          String?
-  date                 DateTime
-  startInscriptionDate DateTime @map("start_inscription_date")
-  endInscriptionDate   DateTime @map("end_inscription_date")
+  date                 String
+  startInscriptionDate String   @map("start_inscription_date")
+  endInscriptionDate   String   @map("end_inscription_date")
   maxParticipants      Int      @map("max_participants")
   graphicURL           String   @map("graphic_url")
   createdAt            DateTime @default(now()) @map("created_at")
