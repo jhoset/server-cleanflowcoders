@@ -8,6 +8,7 @@ import { CommonModule } from './common/common.module';
 import { UserModule } from './user/user.module';
 import { PermissionModule } from './permission/permission.module';
 import { RoleModule } from './role/role.module';
+import { RafflesModule } from './raffles/raffles.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { RoleModule } from './role/role.module';
     UserModule,
     PermissionModule,
     RoleModule,
+    RafflesModule,
   ],
   controllers: [],
   providers: [],
