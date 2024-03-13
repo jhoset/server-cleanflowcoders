@@ -13,9 +13,78 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//******************************************************************************************
+//*                ROLE-BASED ACCESS CONTROL (RBAC) PATTERN
+//******************************************************************************************
 
 model User {
-  id    Int     @default(autoincrement()) @id
-  email String  @unique
-  name  String?
+  id            Int              @id @default(autoincrement())
+  firstName     String           @map("first_name") @db.VarChar(50)
+  middleName    String?          @map("middle_name") @db.VarChar(50)
+  lastName      String?          @map("last_name") @db.VarChar(50)
+  userName      String           @unique @map("user_name") @db.VarChar(55)
+  email         String           @unique @db.VarChar(100)
+  emailVerified Boolean          @default(false) @map("email_verified")
+  password      String           @db.VarChar(60)
+  roles         UserRoleDetail[]
+
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  changedBy String   @map("changed_by") @db.VarChar(55)
+
+  @@index([email])
+  @@map("users")
+}
+
+model UserRoleDetail {
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @map("user_id")
+  role   Role @relation(fields: [roleId], references: [id])
+  roleId Int  @map("role_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  changedBy String   @map("changed_by") @db.VarChar(55)
+
+  @@id([userId, roleId])
+  @@map("user_role_details")
+}
+
+model Role {
+  id          Int                    @id @default(autoincrement())
+  name        String                 @unique @db.VarChar(80)
+  users       UserRoleDetail[]
+  permissions RolePermissionDetail[]
+
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  changedBy String   @map("changed_by") @db.VarChar(55)
+    @@map("roles")
+}
+
+model RolePermissionDetail {
+  role         Role       @relation(fields: [roleId], references: [id])
+  roleId       Int        @map("role_id")
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  permissionId Int        @map("permission_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  changedBy String   @map("changed_by") @db.VarChar(55)
+
+  @@id([roleId, permissionId])
+  @@map("role_permission_details")
+}
+
+model Permission {
+  id    Int                    @id @default(autoincrement())
+  code  String                 @unique @db.VarChar(20)
+  name  String                 @unique @db.VarChar(80)
+  roles RolePermissionDetail[]
+
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  changedBy String   @map("changed_by") @db.VarChar(55)
+  @@map("permissions")
 }
