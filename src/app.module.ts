@@ -5,6 +5,9 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { PrismaModule } from './prisma/prisma.module';
 import { CommonModule } from './common/common.module';
+import { UserModule } from './user/user.module';
+import { PermissionModule } from './permission/permission.module';
+import { RoleModule } from './role/role.module';
 import { RafflesModule } from './raffles/raffles.module';
 
 @Module({
@@ -18,6 +21,9 @@ import { RafflesModule } from './raffles/raffles.module';
     }),
     PrismaModule,
     CommonModule,
+    UserModule,
+    PermissionModule,
+    RoleModule,
     RafflesModule,
   ],
   controllers: [],
