@@ -1,14 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as process from 'process';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   //? Global API Prefix
-  app.setGlobalPrefix('api/v1');
-
+  app.setGlobalPrefix('api');
+  app.enableVersioning({
+    type: VersioningType.URI,
+  });
   //? DTO Validation - Trandformation Setup
   app.useGlobalPipes(new ValidationPipe({
     forbidNonWhitelisted: true,
@@ -18,6 +21,9 @@ async function bootstrap() {
       enableImplicitConversion: true
     }
   }))
+
+  // Set Global Timezone from ENV
+  process.env.TZ = process.env.TIMEZONE;
 
   //? Swagger Configuration
   const options = new DocumentBuilder()
