@@ -32,13 +32,15 @@ export class RafflesController {
   }
 
   @Get()
-  findAll() {
-    return this.rafflesService.findAll();
+  @UseInterceptors(TimezoneHeaderInterceptor)
+  findAll(@Headers('timezone') timezone: string) {
+    return this.rafflesService.findAll(timezone);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.rafflesService.findOne(+id);
+  @UseInterceptors(TimezoneHeaderInterceptor)
+  findOne(@Headers('timezone') timezone: string, @Param('id') id: string) {
+    return this.rafflesService.findOne(timezone, +id);
   }
 
   @Patch(':id')
