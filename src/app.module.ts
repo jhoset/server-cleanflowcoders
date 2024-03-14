@@ -15,6 +15,7 @@ import { RafflesModule } from './raffles/raffles.module';
     ConfigModule.forRoot({
       load: [EnvConfig],
       validationSchema: JoiValidationSchema,
+      isGlobal: true,
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
@@ -29,4 +30,4 @@ import { RafflesModule } from './raffles/raffles.module';
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}
