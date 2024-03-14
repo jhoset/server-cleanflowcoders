@@ -15,10 +15,10 @@ import { PaginationDto } from 'src/common/dto';
 import { Auth } from 'src/auth/decorators';
 import { Permissions } from 'src/helpers/constants';
 
-@ApiTags('User')
+@ApiTags('Users')
 @Auth(Permissions.MANAGE_USER)
 @Controller({
-  path: 'user',
+  path: 'users',
   version: '1',
 })
 export class UserController {

@@ -12,10 +12,10 @@ import { CreatePermissionDto, UpdatePermissionDto } from './dto';
 import { ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/auth/decorators';
 
-@ApiTags('Permission')
+@ApiTags('Permissions')
 @Auth()
 @Controller({
-  path: 'permission',
+  path: 'permissions',
   version: '1',
 })
 export class PermissionController {

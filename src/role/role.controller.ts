@@ -13,10 +13,10 @@ import { ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/auth/decorators';
 import { Permissions } from 'src/helpers/constants';
 
-@ApiTags('Role')
+@ApiTags('Roles')
 @Auth(Permissions.MANAGE_USER)
 @Controller({
-  path: 'role',
+  path: 'roles',
   version: '1',
 })
 export class RoleController {

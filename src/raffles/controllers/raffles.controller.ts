@@ -18,7 +18,9 @@ import {
 } from '../../common/interceptors';
 import { InsertParticipantDto } from '../dto/insert-participant.dto';
 import { Participant, Raffle } from '@prisma/client';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Raffles')
 @Controller({
   path: 'raffles',
   version: '1',
