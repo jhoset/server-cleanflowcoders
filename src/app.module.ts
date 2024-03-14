@@ -16,6 +16,7 @@ import { AuthModule } from './auth/auth.module';
     ConfigModule.forRoot({
       load: [EnvConfig],
       validationSchema: JoiValidationSchema,
+      isGlobal: true,
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),

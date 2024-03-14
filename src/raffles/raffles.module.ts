@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
-import { RafflesService } from './raffles.service';
-import { RafflesController } from './raffles.controller';
+import { RafflesService } from './services/raffles.service';
+import { RafflesController } from './controllers/raffles.controller';
 import { PrismaModule } from '../prisma/prisma.module';
+import { ParticipantsController } from './controllers/participants.controller';
+import { CommonModule } from '../common/common.module';
+import { ParticipantsService } from './services/participants.service';
 
 @Module({
-  imports: [PrismaModule],
-  controllers: [RafflesController],
-  providers: [RafflesService],
+  imports: [PrismaModule, CommonModule],
+  controllers: [RafflesController, ParticipantsController],
+  providers: [RafflesService, ParticipantsService],
 })
 export class RafflesModule {}

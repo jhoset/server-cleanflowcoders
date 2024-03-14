@@ -9,17 +9,15 @@ import {
   Headers,
   UseInterceptors,
 } from '@nestjs/common';
-import { RafflesService } from './raffles.service';
-import { CreateRaffleDto } from './dto/create-raffle.dto';
-import { UpdateRaffleDto } from './dto/update-raffle.dto';
+import { RafflesService } from '../services/raffles.service';
+import { CreateRaffleDto } from '../dto/create-raffle.dto';
+import { UpdateRaffleDto } from '../dto/update-raffle.dto';
 import {
   TimezoneHeaderInterceptor,
   SetTimezoneHeaderRequest,
-} from '../common/interceptors';
-import { Auth } from 'src/auth/decorators';
-import { Permissions } from 'src/helpers/constants';
+} from '../../common/interceptors';
+import { InsertParticipantDto } from '../dto/insert-participant.dto';
 
-@Auth(Permissions.MANAGE_RAFFLE)
 @Controller({
   path: 'raffles',
   version: '1',
@@ -54,5 +52,17 @@ export class RafflesController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.rafflesService.remove(+id);
+  }
+  @Post(':id/participants')
+  async registerParticipant(
+    @Param('id') id: string,
+    @Body() insertParticipant: InsertParticipantDto,
+  ) {
+    return this.rafflesService.registerParticipant(id, insertParticipant);
+  }
+  @Get(':id/play')
+  async playRaffle(@Param('id') id: string) {
+    const winner = await this.rafflesService.playRaffle(id);
+    return { winner };
   }
 }
