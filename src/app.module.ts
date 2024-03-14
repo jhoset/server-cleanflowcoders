@@ -8,6 +8,7 @@ import { CommonModule } from './common/common.module';
 import { UserModule } from './user/user.module';
 import { PermissionModule } from './permission/permission.module';
 import { RoleModule } from './role/role.module';
+import { RafflesModule } from './raffles/raffles.module';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
@@ -24,9 +25,10 @@ import { AuthModule } from './auth/auth.module';
     UserModule,
     PermissionModule,
     RoleModule,
+    RafflesModule,
     AuthModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}
