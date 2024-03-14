@@ -239,18 +239,40 @@ export class RafflesService {
       throw new BadRequestException('An error occurred during the raffle.');
     }
   }
-  private async findValidRaffleForRegistration(id: number): Promise<Raffle> {
+  async getNumberOfParticipants(raffleId: number): Promise<number> {
+    try {
+      return await this.prismaService.raffleParticipant.count({
+        where: { raffleId },
+      });
+    } catch (error) {
+      throw new BadRequestException(
+        `Failed to get number of participants: ${error}`,
+      );
+    }
+  }
+  private async findValidRaffleForRegistration(
+    raffleId: number,
+  ): Promise<Raffle> {
     const tzServer = this.configService.get('TIMEZONE');
     const now = new Date();
-    const raffle: Raffle = await this.findOne(tzServer, +id);
+    const raffle: Raffle = await this.findOne(tzServer, raffleId);
     const startInscriptionDate = new Date(raffle.startInscriptionDate);
     const endInscriptionDate = new Date(raffle.endInscriptionDate);
+    const numberOfParticipants: number =
+      await this.getNumberOfParticipants(raffleId);
 
     if (now < startInscriptionDate || now > endInscriptionDate) {
       throw new BadRequestException(
         'You cannot register for this raffle as it is not within the registration period.',
       );
     }
+
+    if (numberOfParticipants >= raffle.maxParticipants) {
+      throw new BadRequestException(
+        `You cannot register for this raffle because it has reached the maximum number of participants (${raffle.maxParticipants}).`,
+      );
+    }
+
     return raffle;
   }
   private async findValidRaffleForPlay(id: number): Promise<Raffle> {
