@@ -53,8 +53,12 @@ export class RafflesService {
     };
   }
 
-  async findAll(timezone: string) {
-    const raffles: Raffle[] = await this.prismaService.raffle.findMany();
+  async findAll(timezone: string): Promise<Raffle[]> {
+    const raffles: Raffle[] = await this.prismaService.raffle.findMany({
+      where: {
+        isDeleted: false,
+      },
+    });
     const convertedRaffles: Promise<Raffle>[] = raffles.map(
       async (raffle: Raffle) => {
         const { startInscriptionDate, endInscriptionDate, date, ...rest } =
@@ -87,7 +91,7 @@ export class RafflesService {
 
   async findOne(timezone: string, id: number): Promise<Raffle> {
     const raffle: Raffle | null = await this.prismaService.raffle.findUnique({
-      where: { id },
+      where: { id, isDeleted: false },
     });
     if (!raffle) {
       throw new NotFoundException('raffle not found.');
@@ -117,21 +121,37 @@ export class RafflesService {
     };
   }
 
-  async update(id: number, updateRaffleDto: UpdateRaffleDto): Promise<Raffle> {
-    const updatedRaffle = await this.prismaService.raffle.update({
+  async update(
+    id: number,
+    { timezone, ...rest }: UpdateRaffleDto,
+  ): Promise<Raffle> {
+    await this.findOne(timezone, id);
+    await this.prismaService.raffle.update({
       where: {
         id: id,
       },
-      data: updateRaffleDto,
+      data: rest,
     });
-
-    return updatedRaffle;
+    const raffle = await this.findOne(timezone, id);
+    return raffle;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} raffle`;
+  async remove(timezone: string, id: number): Promise<{ message: string }> {
+    await this.findOne(timezone, id);
+    await this.prismaService.raffle.update({
+      where: {
+        id: id,
+      },
+      data: {
+        isDeleted: true,
+      },
+    });
+    return { message: 'Raffle deleted.' };
   }
-  async registerParticipant(id: string, { discordId }: InsertParticipantDto) {
+  async registerParticipant(
+    id: string,
+    { discordId }: InsertParticipantDto,
+  ): Promise<{ message: string }> {
     const raffle: Raffle = await this.findValidRaffleForRegistration(+id);
     const discordUser: GuildMember =
       await this.discordService.getDiscordUser(discordId);
