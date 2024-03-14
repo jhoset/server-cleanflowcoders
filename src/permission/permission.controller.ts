@@ -1,16 +1,25 @@
-import { Controller, Get, Body, Patch, Param, Post, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Body,
+  Patch,
+  Param,
+  Post,
+  Delete,
+} from '@nestjs/common';
 import { PermissionService } from './permission.service';
 import { CreatePermissionDto, UpdatePermissionDto } from './dto';
 import { ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/auth/decorators';
-import { Permissions } from 'src/helpers/constants';
 
 @ApiTags('Permission')
 @Auth()
-@Controller('permission')
+@Controller({
+  path: 'permission',
+  version: '1',
+})
 export class PermissionController {
-  constructor(private readonly permissionService: PermissionService) { }
-
+  constructor(private readonly permissionService: PermissionService) {}
 
   @Get()
   findAll() {
@@ -23,7 +32,10 @@ export class PermissionController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePermissionDto: UpdatePermissionDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updatePermissionDto: UpdatePermissionDto,
+  ) {
     return this.permissionService.update(+id, updatePermissionDto);
   }
 
