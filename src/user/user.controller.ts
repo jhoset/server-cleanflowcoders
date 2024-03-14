@@ -1,15 +1,17 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { PaginationDto } from 'src/common/dto';
 import { Auth } from 'src/auth/decorators';
 import { Permissions } from 'src/helpers/constants';
+import { CreateUserDto, UpdatePasswordDto, UpdateUserDto } from './dto';
 
 @ApiTags('User')
 @Auth(Permissions.MANAGE_USER)
-@Controller('user')
+@Controller({
+  path: 'user',
+  version: '1',
+})
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
@@ -28,6 +30,10 @@ export class UserController {
     return this.userService.findOne(+id);
   }
 
+  @Post('updatePassword')
+  updatePassword(@Body() updatePasswordDto: UpdatePasswordDto) {
+    return this.userService.updatePassword(updatePasswordDto);
+  }
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(+id, updateUserDto);
@@ -37,4 +43,6 @@ export class UserController {
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
   }
+
+
 }
