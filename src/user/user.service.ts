@@ -1,7 +1,7 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationDto, PaginationResultDto } from 'src/common/dto';
-import { CreateUserDto, UpdateUserDto, UserDto, UserWithRolesDto } from './dto';
+import { CreateUserDto, UpdatePasswordDto, UpdateUserDto, UserDto, UserWithRolesDto } from './dto';
 import { ConfigService } from '@nestjs/config';
 import { generateUserName } from 'src/helpers';
 import { BcryptAdapter } from 'src/common/adapters/bcrypt.adapter';
@@ -9,7 +9,7 @@ import { BcryptAdapter } from 'src/common/adapters/bcrypt.adapter';
 @Injectable()
 export class UserService {
 
-  private serverUrl: string;
+  private readonly serverUrl: string;
   constructor(
     private _prisma: PrismaService,
     private _configService: ConfigService,
@@ -61,8 +61,8 @@ export class UserService {
       })
     ])
     const result = dbUsers.map(user => (UserWithRolesDto.mapFrom(user)));
-    const prev = (offset - limit >= 0) ? `${this.serverUrl}/api/user?offset=${offset - limit}&limit=${limit}` : null;
-    const next = (offset + limit < total) ? `${this.serverUrl}/api/user?offset=${offset + limit}&limit=${limit}` : null;
+    const prev = (offset - limit >= 0) ? `${this.serverUrl}/api/v1/user?offset=${offset - limit}&limit=${limit}` : null;
+    const next = (offset + limit < total) ? `${this.serverUrl}/api/v1/user?offset=${offset + limit}&limit=${limit}` : null;
     const pagination = { total, limit, prev, next }
     return new PaginationResultDto(pagination, result)
   }
@@ -116,6 +116,26 @@ export class UserService {
       data: { isDeleted: true, changedBy: 'system' }
     })
     return isDeleted ? true : false;
+  }
+
+  async updatePassword(updatePasswordDto: UpdatePasswordDto) {
+    const { userId, newPassword } = updatePasswordDto;
+    await this.findOne(userId)
+    const userDb = await this._prisma.user.findUnique({
+      where: { id: userId, isDeleted: false },
+      select: { password: true, email: true }
+    });
+    if (this._bcryptAdapter.compare(updatePasswordDto.newPassword, userDb.password)) {
+      throw new BadRequestException('The new password cannot be the same as the previous passwords');
+    }
+    updatePasswordDto.newPassword = this._bcryptAdapter.hash(newPassword);
+    const userUpdated = await this._prisma.user.update({
+      where: { id: userId},
+      data: {
+        password: updatePasswordDto.newPassword
+      }
+    })
+    return true;
   }
 
 

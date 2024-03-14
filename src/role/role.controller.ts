@@ -8,7 +8,10 @@ import { Permissions } from 'src/helpers/constants';
 
 @ApiTags('Role')
 @Auth(Permissions.MANAGE_USER)
-@Controller('role')
+@Controller({
+  path: 'role',
+  version: '1',
+})
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 

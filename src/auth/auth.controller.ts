@@ -6,7 +6,10 @@ import { Auth, CurrentUser } from './decorators';
 import { Permissions } from 'src/helpers/constants';
 
 @ApiTags('Auth')
-@Controller('auth')
+@Controller({
+  path: 'auth',
+  version: '1',
+})
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 

@@ -7,7 +7,10 @@ import { Permissions } from 'src/helpers/constants';
 
 @ApiTags('Permission')
 @Auth()
-@Controller('permission')
+@Controller({
+  path: 'permission',
+  version: '1',
+})
 export class PermissionController {
   constructor(private readonly permissionService: PermissionService) { }
 
