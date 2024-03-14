@@ -13,9 +13,137 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//******************************************************************************************
+//*                ROLE-BASED ACCESS CONTROL (RBAC)
+//******************************************************************************************
 
 model User {
-  id    Int     @default(autoincrement()) @id
-  email String  @unique
-  name  String?
+  id            Int              @id @default(autoincrement())
+  firstName     String           @map("first_name") @db.VarChar(50)
+  middleName    String?          @map("middle_name") @db.VarChar(50)
+  lastName      String           @map("last_name") @db.VarChar(50)
+  userName      String           @unique @map("user_name") @db.VarChar(55)
+  email         String           @unique @db.VarChar(100)
+  emailVerified Boolean          @default(false) @map("email_verified")
+  password      String           @db.VarChar(60)
+  roles         UserRoleDetail[]
+
+  //? Metadata/Audit Fields
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  changedBy String   @default("system") @map("changed_by") @db.VarChar(55)
+
+  @@index([email])
+  @@map("users")
+}
+
+model UserRoleDetail {
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @map("user_id")
+  role   Role @relation(fields: [roleId], references: [id])
+  roleId Int  @map("role_id")
+
+  //? Metadata/Audit Fields
+  createdAt DateTime @default(now()) @map("created_at")
+  changedBy String   @default("system") @map("changed_by") @db.VarChar(55)
+
+  @@id([userId, roleId])
+  @@map("user_role_details")
+}
+
+model Role {
+  id          Int                    @id @default(autoincrement())
+  name        String                 @unique @db.VarChar(80)
+  users       UserRoleDetail[]
+  permissions RolePermissionDetail[]
+
+  //? Metadata/Audit Fields
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  changedBy String   @default("system") @map("changed_by") @db.VarChar(55)
+
+  @@map("roles")
+}
+
+model RolePermissionDetail {
+  role         Role       @relation(fields: [roleId], references: [id])
+  roleId       Int        @map("role_id")
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  permissionId Int        @map("permission_id")
+
+  //? Metadata/Audit Fields
+  createdAt DateTime @default(now()) @map("created_at")
+  changedBy String   @default("system") @map("changed_by") @db.VarChar(55)
+
+  @@id([roleId, permissionId])
+  @@map("role_permission_details")
+}
+
+model Permission {
+  id    Int                    @id @default(autoincrement())
+  code  String                 @unique @db.VarChar(20)
+  name  String                 @unique @db.VarChar(80)
+  roles RolePermissionDetail[]
+
+  //? Metadata/Audit Fields
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  changedBy String   @default("system") @map("changed_by") @db.VarChar(55)
+
+  @@map("permissions")
+}
+
+//******************************************************************************************
+//*                RAFFLE
+//******************************************************************************************
+
+model Raffle {
+  id                   Int                 @id @default(autoincrement())
+  name                 String
+  description          String?
+  date                 String
+  startInscriptionDate String  @map("start_inscription_date")
+  endInscriptionDate   String  @map("end_inscription_date")
+  maxParticipants      Int     @map("max_participants")
+  graphicURL           String  @map("graphic_url")
+  isPlay               Boolean             @default(false)
+  participants         RaffleParticipant[]
+
+  //? Metadata/Audit Fields
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  changedBy String   @default("system") @map("changed_by") @db.VarChar(55)
+
+  @@map("raffles")
+}
+
+model Participant {
+  id         Int                 @id @default(autoincrement())
+  discordId  String              @unique @map("discord_id")
+  globalName String              @map("global_name")
+  username   String
+  avatarUrl  String              @map("avatar_url")
+  joinedAt   DateTime            @map("joined_at")
+  createdAt  DateTime            @default(now()) @map("created_at")
+  updatedAt  DateTime            @updatedAt @map("updated_at")
+  raffles    RaffleParticipant[]
+
+  @@map("participants")
+}
+
+model RaffleParticipant {
+  raffle        Raffle      @relation(fields: [raffleId], references: [id])
+  raffleId      Int         @map("raffle_id")
+  participant   Participant @relation(fields: [participantId], references: [id])
+  participantId Int         @map("participant_id")
+  isWinner      Boolean     @default(false) @map("is_winner")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  @@id([raffleId, participantId])
+  @@map("raffles_has_participants")
 }
