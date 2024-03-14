@@ -16,13 +16,16 @@ import {
   TimezoneHeaderInterceptor,
   SetTimezoneHeaderRequest,
 } from '../common/interceptors';
+import { Auth } from 'src/auth/decorators';
+import { Permissions } from 'src/helpers/constants';
 
+@Auth(Permissions.MANAGE_RAFFLE)
 @Controller({
   path: 'raffles',
   version: '1',
 })
 export class RafflesController {
-  constructor(private readonly rafflesService: RafflesService) {}
+  constructor(private readonly rafflesService: RafflesService) { }
 
   @Post()
   @UseInterceptors(TimezoneHeaderInterceptor)

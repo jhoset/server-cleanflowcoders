@@ -61,8 +61,8 @@ export class UserService {
       })
     ])
     const result = dbUsers.map(user => (UserWithRolesDto.mapFrom(user)));
-    const prev = (offset - limit >= 0) ? `${this.serverUrl}/api/v1/user?offset=${offset - limit}&limit=${limit}` : null;
-    const next = (offset + limit < total) ? `${this.serverUrl}/api/v1/user?offset=${offset + limit}&limit=${limit}` : null;
+    const prev = (offset - limit >= 0) ? `${this.serverUrl}/api/user?offset=${offset - limit}&limit=${limit}` : null;
+    const next = (offset + limit < total) ? `${this.serverUrl}/api/user?offset=${offset + limit}&limit=${limit}` : null;
     const pagination = { total, limit, prev, next }
     return new PaginationResultDto(pagination, result)
   }

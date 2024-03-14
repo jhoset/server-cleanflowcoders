@@ -3,7 +3,7 @@ CREATE TABLE "users" (
     "id" SERIAL NOT NULL,
     "first_name" VARCHAR(50) NOT NULL,
     "middle_name" VARCHAR(50),
-    "last_name" VARCHAR(50),
+    "last_name" VARCHAR(50) NOT NULL,
     "user_name" VARCHAR(55) NOT NULL,
     "email" VARCHAR(100) NOT NULL,
     "email_verified" BOOLEAN NOT NULL DEFAULT false,
@@ -11,7 +11,7 @@ CREATE TABLE "users" (
     "is_deleted" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "changed_by" VARCHAR(55) NOT NULL,
+    "changed_by" VARCHAR(55) NOT NULL DEFAULT 'system',
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -21,7 +21,7 @@ CREATE TABLE "user_role_details" (
     "user_id" INTEGER NOT NULL,
     "role_id" INTEGER NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "changed_by" VARCHAR(55) NOT NULL,
+    "changed_by" VARCHAR(55) NOT NULL DEFAULT 'system',
 
     CONSTRAINT "user_role_details_pkey" PRIMARY KEY ("user_id","role_id")
 );
@@ -33,7 +33,7 @@ CREATE TABLE "roles" (
     "is_deleted" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "changed_by" VARCHAR(55) NOT NULL,
+    "changed_by" VARCHAR(55) NOT NULL DEFAULT 'system',
 
     CONSTRAINT "roles_pkey" PRIMARY KEY ("id")
 );
@@ -43,7 +43,7 @@ CREATE TABLE "role_permission_details" (
     "role_id" INTEGER NOT NULL,
     "permission_id" INTEGER NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "changed_by" VARCHAR(55) NOT NULL,
+    "changed_by" VARCHAR(55) NOT NULL DEFAULT 'system',
 
     CONSTRAINT "role_permission_details_pkey" PRIMARY KEY ("role_id","permission_id")
 );
@@ -56,7 +56,7 @@ CREATE TABLE "permissions" (
     "is_deleted" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "changed_by" VARCHAR(55) NOT NULL,
+    "changed_by" VARCHAR(55) NOT NULL DEFAULT 'system',
 
     CONSTRAINT "permissions_pkey" PRIMARY KEY ("id")
 );
