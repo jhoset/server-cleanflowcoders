@@ -148,6 +148,13 @@ export class RafflesService {
     });
     return { message: 'Raffle deleted.' };
   }
+  async listParticipants(
+    timezone: string,
+    raffleId: number,
+  ): Promise<Participant[]> {
+    await this.findOne(timezone, raffleId);
+    return this.participantService.getParticipantsByRaffleId(raffleId);
+  }
   async registerParticipant(
     id: string,
     { discordId }: InsertParticipantDto,
@@ -197,6 +204,9 @@ export class RafflesService {
       throw new InternalServerErrorException(e.message);
     }
   }
+  async getWinnerByRaffleId(raffleId: number): Promise<Participant> {
+    return this.participantService.getWinnerByRaffleId(raffleId);
+  }
   async playRaffle(id: string): Promise<Participant> {
     const raffle: Raffle = await this.findValidRaffleForPlay(+id);
 
@@ -239,17 +249,6 @@ export class RafflesService {
       throw new BadRequestException('An error occurred during the raffle.');
     }
   }
-  async getNumberOfParticipants(raffleId: number): Promise<number> {
-    try {
-      return await this.prismaService.raffleParticipant.count({
-        where: { raffleId },
-      });
-    } catch (error) {
-      throw new BadRequestException(
-        `Failed to get number of participants: ${error}`,
-      );
-    }
-  }
   private async findValidRaffleForRegistration(
     raffleId: number,
   ): Promise<Raffle> {
@@ -259,7 +258,7 @@ export class RafflesService {
     const startInscriptionDate = new Date(raffle.startInscriptionDate);
     const endInscriptionDate = new Date(raffle.endInscriptionDate);
     const numberOfParticipants: number =
-      await this.getNumberOfParticipants(raffleId);
+      await this.participantService.getNumberOfParticipantsByRaffleId(raffleId);
 
     if (now < startInscriptionDate || now > endInscriptionDate) {
       throw new BadRequestException(

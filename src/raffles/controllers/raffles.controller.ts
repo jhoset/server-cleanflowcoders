@@ -68,12 +68,24 @@ export class RafflesController {
   ): Promise<{ message: string }> {
     return this.rafflesService.remove(timezone, +id);
   }
+  @Get(':id/participants')
+  @UseInterceptors(TimezoneHeaderInterceptor)
+  async listParticipants(
+    @Headers('timezone') timezone: string,
+    @Param('id') id: string,
+  ): Promise<Participant[]> {
+    return await this.rafflesService.listParticipants(timezone, +id);
+  }
   @Post(':id/participants')
   async registerParticipant(
     @Param('id') id: string,
     @Body() insertParticipant: InsertParticipantDto,
   ): Promise<{ message: string }> {
     return this.rafflesService.registerParticipant(id, insertParticipant);
+  }
+  @Get(':id/winner')
+  async getWinnerByRaffleId(@Param('id') id: string): Promise<Participant> {
+    return this.rafflesService.getWinnerByRaffleId(+id);
   }
   @Get(':id/play')
   async playRaffle(@Param('id') id: string): Promise<{ winner: Participant }> {
