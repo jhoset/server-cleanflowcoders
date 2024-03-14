@@ -9,13 +9,14 @@ import {
   Headers,
   UseInterceptors,
 } from '@nestjs/common';
-import { RafflesService } from './raffles.service';
-import { CreateRaffleDto } from './dto/create-raffle.dto';
-import { UpdateRaffleDto } from './dto/update-raffle.dto';
+import { RafflesService } from '../services/raffles.service';
+import { CreateRaffleDto } from '../dto/create-raffle.dto';
+import { UpdateRaffleDto } from '../dto/update-raffle.dto';
 import {
   TimezoneHeaderInterceptor,
   SetTimezoneHeaderRequest,
-} from '../common/interceptors';
+} from '../../common/interceptors';
+import { InsertParticipantDto } from '../dto/insert-participant.dto';
 
 @Controller({
   path: 'raffles',
@@ -51,5 +52,12 @@ export class RafflesController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.rafflesService.remove(+id);
+  }
+  @Post(':id/participants')
+  async insertParticipant(
+    @Param('id') id: string,
+    @Body() insertParticipant: InsertParticipantDto,
+  ) {
+    return this.rafflesService.insertParticipant(id, insertParticipant);
   }
 }

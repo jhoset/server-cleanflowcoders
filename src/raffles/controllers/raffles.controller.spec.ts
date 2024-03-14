@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RafflesController } from './raffles.controller';
-import { RafflesService } from './raffles.service';
+import { RafflesService } from '../services/raffles.service';
 
 describe('RafflesController', () => {
   let controller: RafflesController;

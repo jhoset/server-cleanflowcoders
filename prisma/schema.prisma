@@ -12,6 +12,7 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 //******************************************************************************************
 //*                ROLE-BASED ACCESS CONTROL (RBAC) PATTERN
 //******************************************************************************************
@@ -59,7 +60,8 @@ model Role {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   changedBy String   @map("changed_by") @db.VarChar(55)
-    @@map("roles")
+
+  @@map("roles")
 }
 
 model RolePermissionDetail {
@@ -85,20 +87,49 @@ model Permission {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   changedBy String   @map("changed_by") @db.VarChar(55)
+
   @@map("permissions")
 }
 
 model Raffle {
-  id                   Int      @id @default(autoincrement())
+  id                   Int                 @id @default(autoincrement())
   name                 String
   description          String?
   date                 String
-  startInscriptionDate String   @map("start_inscription_date")
-  endInscriptionDate   String   @map("end_inscription_date")
-  maxParticipants      Int      @map("max_participants")
-  graphicURL           String   @map("graphic_url")
-  createdAt            DateTime @default(now()) @map("created_at")
-  updatedAt            DateTime @updatedAt @map("updated_at")
+  startInscriptionDate String              @map("start_inscription_date")
+  endInscriptionDate   String              @map("end_inscription_date")
+  maxParticipants      Int                 @map("max_participants")
+  graphicURL           String              @map("graphic_url")
+  createdAt            DateTime            @default(now()) @map("created_at")
+  updatedAt            DateTime            @updatedAt @map("updated_at")
+  participants         RaffleParticipant[]
 
   @@map("raffles")
+}
+
+model Participant {
+  id         Int                 @id @default(autoincrement())
+  discordId  String              @unique @map("discord_id")
+  globalName String              @map("global_name")
+  username   String
+  avatarUrl  String              @map("avatar_url")
+  joinedAt   DateTime            @map("joined_at")
+  createdAt  DateTime            @default(now()) @map("created_at")
+  updatedAt  DateTime            @updatedAt @map("updated_at")
+  raffles    RaffleParticipant[]
+
+  @@map("participants")
+}
+
+model RaffleParticipant {
+  raffle        Raffle      @relation(fields: [raffleId], references: [id])
+  raffleId      Int         @map("raffle_id")
+  participant   Participant @relation(fields: [participantId], references: [id])
+  participantId Int         @map("participant_id")
+  isWinner      Boolean     @default(false) @map("is_winner")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  @@id([raffleId, participantId])
+  @@map("raffles_has_participants")
 }

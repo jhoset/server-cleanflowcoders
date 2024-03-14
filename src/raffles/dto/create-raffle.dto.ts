@@ -16,29 +16,30 @@ import { TimezoneAdapter } from '../../common/adapters';
 
 @ValidatorConstraint({ name: 'isAfterStartDate', async: false })
 export class IsAfterStartDate implements ValidatorConstraintInterface {
-  validate(startInscriptionDate: string, args: ValidationArguments) {
+  validate(endInscriptionDate: string, args: ValidationArguments) {
     const createRaffleDto = args.object as CreateRaffleDto;
-    const startDate = new Date(startInscriptionDate);
-    const date = new Date(createRaffleDto.date);
-    return startDate > date;
+    const EndDate = new Date(endInscriptionDate);
+    const StartDate = new Date(createRaffleDto.startInscriptionDate);
+    console.log(endInscriptionDate,createRaffleDto.startInscriptionDate);
+    return EndDate > StartDate;
   }
 
   defaultMessage(args: ValidationArguments) {
-    return 'Start inscription date must be after the raffle date.';
+    return 'End inscription date must be after start inscription date.';
   }
 }
 
 @ValidatorConstraint({ name: 'isAfterEndDate', async: false })
 export class IsAfterEndDate implements ValidatorConstraintInterface {
-  validate(endInscriptionDate: string, args: ValidationArguments) {
+  validate(date: string, args: ValidationArguments) {
     const createRaffleDto = args.object as CreateRaffleDto;
-    const endDate = new Date(endInscriptionDate);
-    const startDate = new Date(createRaffleDto.startInscriptionDate);
-    return endDate > startDate;
+    const dateRaffle = new Date(date);
+    const endDate = new Date(createRaffleDto.endInscriptionDate);
+    return dateRaffle > endDate;
   }
 
   defaultMessage(args: ValidationArguments) {
-    return 'End inscription date must be after the start inscription date.';
+    return 'date must be after the end inscription date.';
   }
 }
 export class CreateRaffleDto {
@@ -52,24 +53,14 @@ export class CreateRaffleDto {
 
   timezone: string;
 
-  @IsNotEmpty()
   @Validate(IsValidDateFormat)
+  @IsNotEmpty()
   @Transform(({ value, obj }: TransformFnParams) =>
     TimezoneAdapter.convertToSystemTimezone(value, obj.timezone).format(
       'YYYY-MM-DD HH:mm:ss',
     ),
   )
   @Validate(IsFutureDate)
-  date: string;
-
-  @Validate(IsValidDateFormat)
-  @IsNotEmpty()
-  @Transform(({ value, obj }: TransformFnParams) =>
-    TimezoneAdapter.convertToSystemTimezone(value, obj.timezone).format(
-      'YYYY-MM-DD HH:mm:ss',
-    ),
-  )
-  @Validate(IsAfterStartDate)
   startInscriptionDate: string;
 
   @Validate(IsValidDateFormat)
@@ -79,8 +70,18 @@ export class CreateRaffleDto {
       'YYYY-MM-DD HH:mm:ss',
     ),
   )
-  @Validate(IsAfterEndDate)
+  @Validate(IsAfterStartDate)
   endInscriptionDate: string;
+
+  @IsNotEmpty()
+  @Validate(IsValidDateFormat)
+  @Transform(({ value, obj }: TransformFnParams) =>
+    TimezoneAdapter.convertToSystemTimezone(value, obj.timezone).format(
+      'YYYY-MM-DD HH:mm:ss',
+    ),
+  )
+  @Validate(IsAfterEndDate)
+  date: string;
 
   @IsNumber()
   @Min(1)
