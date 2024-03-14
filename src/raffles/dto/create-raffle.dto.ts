@@ -20,7 +20,7 @@ export class IsAfterStartDate implements ValidatorConstraintInterface {
     const createRaffleDto = args.object as CreateRaffleDto;
     const EndDate = new Date(endInscriptionDate);
     const StartDate = new Date(createRaffleDto.startInscriptionDate);
-    console.log(endInscriptionDate,createRaffleDto.startInscriptionDate);
+    console.log(endInscriptionDate, createRaffleDto.startInscriptionDate);
     return EndDate > StartDate;
   }
 
@@ -91,4 +91,6 @@ export class CreateRaffleDto {
   @IsUrl()
   @IsNotEmpty()
   graphicURL: string;
+
+  isPlay: boolean;
 }

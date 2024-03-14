@@ -1,16 +1,13 @@
 import {
   BadRequestException,
-  Body,
-  Headers,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  Param,
 } from '@nestjs/common';
 import { CreateRaffleDto } from '../dto/create-raffle.dto';
 import { UpdateRaffleDto } from '../dto/update-raffle.dto';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Participant, Raffle, RaffleParticipant } from '@prisma/client';
+import { Participant, Raffle } from '@prisma/client';
 import { TimezoneAdapter } from '../../common/adapters';
 import { GuildMember } from 'discord.js';
 import { InsertParticipantDto } from '../dto/insert-participant.dto';
@@ -120,31 +117,26 @@ export class RafflesService {
     };
   }
 
-  update(id: number, updateRaffleDto: UpdateRaffleDto) {
-    return `This action updates a #${id} raffle`;
+  async update(id: number, updateRaffleDto: UpdateRaffleDto): Promise<Raffle> {
+    const updatedRaffle = await this.prismaService.raffle.update({
+      where: {
+        id: id,
+      },
+      data: updateRaffleDto,
+    });
+
+    return updatedRaffle;
   }
 
   remove(id: number) {
     return `This action removes a #${id} raffle`;
   }
-  async findValidRaffleForRegistration(id: number): Promise<Raffle> {
-    const tzServer = this.configService.get('TIMEZONE');
-    const now = new Date();
-    const raffle: Raffle = await this.findOne(tzServer, +id);
-    const startInscriptionDate = new Date(raffle.startInscriptionDate);
-    const endInscriptionDate = new Date(raffle.endInscriptionDate);
-
-    if (now < startInscriptionDate || now > endInscriptionDate) {
-      throw new BadRequestException(
-        'You cannot register for this raffle as it is not within the registration period.',
-      );
-    }
-    return raffle;
-  }
-  async insertParticipant(id: string, { discordId }: InsertParticipantDto) {
+  async registerParticipant(id: string, { discordId }: InsertParticipantDto) {
     const raffle: Raffle = await this.findValidRaffleForRegistration(+id);
     const discordUser: GuildMember =
       await this.discordService.getDiscordUser(discordId);
+    if (!discordUser)
+      throw new BadRequestException('User not found in the discord server.');
     try {
       const transaction = await this.prismaService.$transaction(
         async (prisma) => {
@@ -184,5 +176,112 @@ export class RafflesService {
       console.log(e);
       throw new InternalServerErrorException(e.message);
     }
+  }
+  async playRaffle(id: string): Promise<Participant> {
+    const raffle: Raffle = await this.findValidRaffleForPlay(+id);
+
+    const participants: Participant[] =
+      await this.participantService.getParticipantsByRaffleId(raffle.id);
+
+    const winner: Participant =
+      await this.selectWinnerAndValidateCommunity(participants);
+
+    try {
+      const transaction = await this.prismaService.$transaction(
+        async (prisma) => {
+          await prisma.raffleParticipant.update({
+            where: {
+              raffleId_participantId: {
+                raffleId: raffle.id,
+                participantId: winner.id,
+              },
+            },
+            data: {
+              isWinner: true,
+            },
+          });
+
+          await prisma.raffle.update({
+            where: {
+              id: raffle.id,
+            },
+            data: {
+              isPlay: true,
+            },
+          });
+
+          return winner;
+        },
+      );
+
+      return transaction;
+    } catch (error) {
+      throw new BadRequestException('An error occurred during the raffle.');
+    }
+  }
+  private async findValidRaffleForRegistration(id: number): Promise<Raffle> {
+    const tzServer = this.configService.get('TIMEZONE');
+    const now = new Date();
+    const raffle: Raffle = await this.findOne(tzServer, +id);
+    const startInscriptionDate = new Date(raffle.startInscriptionDate);
+    const endInscriptionDate = new Date(raffle.endInscriptionDate);
+
+    if (now < startInscriptionDate || now > endInscriptionDate) {
+      throw new BadRequestException(
+        'You cannot register for this raffle as it is not within the registration period.',
+      );
+    }
+    return raffle;
+  }
+  private async findValidRaffleForPlay(id: number): Promise<Raffle> {
+    const tzServer = this.configService.get('TIMEZONE');
+    const now = new Date();
+    const raffle: Raffle = await this.findOne(tzServer, +id);
+    const date = new Date(raffle.date);
+    if (raffle.isPlay) {
+      throw new BadRequestException(
+        'You cannot play this raffle because it has already been play.',
+      );
+    }
+    if (now < date) {
+      throw new BadRequestException(
+        'You cannot play this raffle because the raffle date has not yet been reached.',
+      );
+    }
+    return raffle;
+  }
+  private async selectWinnerAndValidateCommunity(
+    participants: Participant[],
+  ): Promise<Participant> {
+    if (participants.length === 0) {
+      throw new BadRequestException(
+        'No participants available for the raffle.',
+      );
+    }
+
+    const shuffledParticipants = this.shuffleArray(participants);
+
+    const winner: Participant = shuffledParticipants[0];
+
+    const discordUser: GuildMember | null =
+      await this.discordService.getDiscordUser(winner.discordId);
+    if (!discordUser) {
+      shuffledParticipants.splice(0, 1); // Eliminar al ganador de la lista de participantes mezclada
+      return this.selectWinnerAndValidateCommunity(shuffledParticipants);
+    }
+
+    return winner;
+  }
+  // algoritmo Fisher-Yates
+  private shuffleArray<T>(array: T[]): T[] {
+    const shuffledArray = [...array];
+    for (let i = shuffledArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledArray[i], shuffledArray[j]] = [
+        shuffledArray[j],
+        shuffledArray[i],
+      ];
+    }
+    return shuffledArray;
   }
 }

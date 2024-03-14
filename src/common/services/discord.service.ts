@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Client, GatewayIntentBits, GuildMember } from 'discord.js';
 
@@ -13,14 +13,14 @@ export class DiscordService {
     });
     this.client.login(this.configService.get<string>('BOT_TOKEN_DISCORD'));
   }
-  async getDiscordUser(discordId: string): Promise<GuildMember> {
+  async getDiscordUser(discordId: string): Promise<GuildMember | null> {
     try {
       const serverId = this.configService.get<string>('SERVER_ID_DISCORD');
       const server = await this.getServerDiscord(serverId);
       const member = await server.members.fetch(discordId);
       return member;
     } catch (error) {
-      throw new BadRequestException('User not found in the discord server.');
+      return null;
     }
   }
   async getServerDiscord(serverId: string) {

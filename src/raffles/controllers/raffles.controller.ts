@@ -54,10 +54,15 @@ export class RafflesController {
     return this.rafflesService.remove(+id);
   }
   @Post(':id/participants')
-  async insertParticipant(
+  async registerParticipant(
     @Param('id') id: string,
     @Body() insertParticipant: InsertParticipantDto,
   ) {
-    return this.rafflesService.insertParticipant(id, insertParticipant);
+    return this.rafflesService.registerParticipant(id, insertParticipant);
+  }
+  @Get(':id/play')
+  async playRaffle(@Param('id') id: string) {
+    const winner = await this.rafflesService.playRaffle(id);
+    return { winner };
   }
 }

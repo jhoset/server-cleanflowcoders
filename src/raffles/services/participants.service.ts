@@ -26,4 +26,15 @@ export class ParticipantsService {
     if (participant) return participant;
     return this.createParticipant(participantData);
   }
+  async getParticipantsByRaffleId(raffleId: number): Promise<Participant[]> {
+    return await this.prismaService.participant.findMany({
+      where: {
+        raffles: {
+          some: {
+            raffleId,
+          },
+        },
+      },
+    });
+  }
 }

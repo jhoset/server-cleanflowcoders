@@ -100,6 +100,7 @@ model Raffle {
   endInscriptionDate   String              @map("end_inscription_date")
   maxParticipants      Int                 @map("max_participants")
   graphicURL           String              @map("graphic_url")
+  isPlay               Boolean             @default(false)
   createdAt            DateTime            @default(now()) @map("created_at")
   updatedAt            DateTime            @updatedAt @map("updated_at")
   participants         RaffleParticipant[]
