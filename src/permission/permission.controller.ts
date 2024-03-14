@@ -1,6 +1,6 @@
-import { Controller, Get, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Post } from '@nestjs/common';
 import { PermissionService } from './permission.service';
-import { UpdatePermissionDto } from './dto';
+import { CreatePermissionDto, UpdatePermissionDto } from './dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Permission')
@@ -24,10 +24,10 @@ export class PermissionController {
     return this.permissionService.update(+id, updatePermissionDto);
   }
 
-  // @Post()
-  // create(@Body() createPermissionDto: CreatePermissionDto) {
-  //   return this.permissionService.create(createPermissionDto);
-  // }
+  @Post()
+  create(@Body() createPermissionDto: CreatePermissionDto) {
+    return this.permissionService.create(createPermissionDto);
+  }
 
   // @Delete(':id')
   // remove(@Param('id') id: string) {

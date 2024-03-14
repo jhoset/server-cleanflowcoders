@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsArray, IsBoolean, IsEmail, IsOptional, IsString, MinLength, ValidateNested, minLength } from "class-validator";
+import { IsArray, IsBoolean, IsEmail, IsOptional, IsString, MaxLength, MinLength, ValidateNested, minLength } from "class-validator";
 import { RoleDto } from "src/role/dto";
 
 export class CreateUserDto {
@@ -22,6 +22,7 @@ export class CreateUserDto {
 
     @IsString()
     @MinLength(8)
+    @MaxLength(50)
     public password: string;
 
     @IsArray()
