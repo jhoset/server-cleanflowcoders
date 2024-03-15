@@ -8,6 +8,7 @@ import {
   Delete,
   Headers,
   UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { RafflesService } from '../services/raffles.service';
 import { CreateRaffleDto } from '../dto/create-raffle.dto';
@@ -37,8 +38,11 @@ export class RafflesController {
 
   @Get()
   @UseInterceptors(TimezoneHeaderInterceptor)
-  async findAll(@Headers('timezone') timezone: string): Promise<Raffle[]> {
-    return this.rafflesService.findAll(timezone);
+  async findAll(
+    @Headers('timezone') timezone: string,
+    @Query('search') search?: string,
+  ): Promise<Raffle[]> {
+    return this.rafflesService.findAll(timezone, search);
   }
 
   @Get(':id')

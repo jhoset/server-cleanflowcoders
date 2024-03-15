@@ -7,7 +7,7 @@ import {
 import { CreateRaffleDto } from '../dto/create-raffle.dto';
 import { UpdateRaffleDto } from '../dto/update-raffle.dto';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Participant, Raffle } from '@prisma/client';
+import { Participant, Prisma, Raffle } from '@prisma/client';
 import { TimezoneAdapter } from '../../common/adapters';
 import { GuildMember } from 'discord.js';
 import { InsertParticipantDto } from '../dto/insert-participant.dto';
@@ -53,11 +53,21 @@ export class RafflesService {
     };
   }
 
-  async findAll(timezone: string): Promise<Raffle[]> {
+  async findAll(timezone: string, search?: string): Promise<Raffle[]> {
+    let whereCondition: Prisma.RaffleWhereInput = {
+      isDeleted: false,
+    };
+    if (search) {
+      whereCondition = {
+        ...whereCondition,
+        name: {
+          contains: search,
+          mode: 'insensitive',
+        },
+      };
+    }
     const raffles: Raffle[] = await this.prismaService.raffle.findMany({
-      where: {
-        isDeleted: false,
-      },
+      where: whereCondition,
     });
     const convertedRaffles: Promise<Raffle>[] = raffles.map(
       async (raffle: Raffle) => {
