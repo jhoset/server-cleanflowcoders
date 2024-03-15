@@ -10,6 +10,7 @@ import { PermissionModule } from './permission/permission.module';
 import { RoleModule } from './role/role.module';
 import { RafflesModule } from './raffles/raffles.module';
 import { AuthModule } from './auth/auth.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { AuthModule } from './auth/auth.module';
     RoleModule,
     RafflesModule,
     AuthModule,
+    UploadsModule,
   ],
   controllers: [],
   providers: [],
