@@ -10,4 +10,7 @@ export const JoiValidationSchema = Joi.object({
   TIMEZONE: JoiTZ.timezone().required(),
   BOT_TOKEN_DISCORD: Joi.string().required(),
   SERVER_ID_DISCORD: Joi.string().required(),
+  CLOUDINARY_CLOUD_NAME: Joi.string().required(),
+  CLOUDINARY_API_KEY: Joi.string().required(),
+  CLOUDINARY_API_SECRET: Joi.string().required(),
 });

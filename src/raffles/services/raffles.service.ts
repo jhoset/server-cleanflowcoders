@@ -7,7 +7,7 @@ import {
 import { CreateRaffleDto } from '../dto/create-raffle.dto';
 import { UpdateRaffleDto } from '../dto/update-raffle.dto';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Participant, Raffle } from '@prisma/client';
+import { Participant, Prisma, Raffle } from '@prisma/client';
 import { TimezoneAdapter } from '../../common/adapters';
 import { GuildMember } from 'discord.js';
 import { InsertParticipantDto } from '../dto/insert-participant.dto';
@@ -53,11 +53,21 @@ export class RafflesService {
     };
   }
 
-  async findAll(timezone: string): Promise<Raffle[]> {
+  async findAll(timezone: string, search?: string): Promise<Raffle[]> {
+    let whereCondition: Prisma.RaffleWhereInput = {
+      isDeleted: false,
+    };
+    if (search) {
+      whereCondition = {
+        ...whereCondition,
+        name: {
+          contains: search,
+          mode: 'insensitive',
+        },
+      };
+    }
     const raffles: Raffle[] = await this.prismaService.raffle.findMany({
-      where: {
-        isDeleted: false,
-      },
+      where: whereCondition,
     });
     const convertedRaffles: Promise<Raffle>[] = raffles.map(
       async (raffle: Raffle) => {
@@ -148,6 +158,13 @@ export class RafflesService {
     });
     return { message: 'Raffle deleted.' };
   }
+  async listParticipants(
+    timezone: string,
+    raffleId: number,
+  ): Promise<Participant[]> {
+    await this.findOne(timezone, raffleId);
+    return this.participantService.getParticipantsByRaffleId(raffleId);
+  }
   async registerParticipant(
     id: string,
     { discordId }: InsertParticipantDto,
@@ -197,6 +214,9 @@ export class RafflesService {
       throw new InternalServerErrorException(e.message);
     }
   }
+  async getWinnerByRaffleId(raffleId: number): Promise<Participant> {
+    return this.participantService.getWinnerByRaffleId(raffleId);
+  }
   async playRaffle(id: string): Promise<Participant> {
     const raffle: Raffle = await this.findValidRaffleForPlay(+id);
 
@@ -239,18 +259,29 @@ export class RafflesService {
       throw new BadRequestException('An error occurred during the raffle.');
     }
   }
-  private async findValidRaffleForRegistration(id: number): Promise<Raffle> {
+  private async findValidRaffleForRegistration(
+    raffleId: number,
+  ): Promise<Raffle> {
     const tzServer = this.configService.get('TIMEZONE');
     const now = new Date();
-    const raffle: Raffle = await this.findOne(tzServer, +id);
+    const raffle: Raffle = await this.findOne(tzServer, raffleId);
     const startInscriptionDate = new Date(raffle.startInscriptionDate);
     const endInscriptionDate = new Date(raffle.endInscriptionDate);
+    const numberOfParticipants: number =
+      await this.participantService.getNumberOfParticipantsByRaffleId(raffleId);
 
     if (now < startInscriptionDate || now > endInscriptionDate) {
       throw new BadRequestException(
         'You cannot register for this raffle as it is not within the registration period.',
       );
     }
+
+    if (numberOfParticipants >= raffle.maxParticipants) {
+      throw new BadRequestException(
+        `You cannot register for this raffle because it has reached the maximum number of participants (${raffle.maxParticipants}).`,
+      );
+    }
+
     return raffle;
   }
   private async findValidRaffleForPlay(id: number): Promise<Raffle> {
