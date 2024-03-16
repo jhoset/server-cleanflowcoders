@@ -61,18 +61,12 @@ export class CreateRaffleDto {
   @IsOptional()
   description: string;
 
-  @ApiProperty({
-    type: String,
-    description: 'The timezone.',
-    required: true,
-  })
-  @IsString()
-  @IsNotEmpty()
   timezone: string;
 
   @ApiProperty({
     type: String,
-    description: 'The start date and time for participants to join the raffle. Must be in valid date format.',
+    description:
+      'The start date and time for participants to join the raffle. Must be in valid date format.',
     required: true,
   })
   @Validate(IsValidDateFormat)
@@ -87,7 +81,8 @@ export class CreateRaffleDto {
 
   @ApiProperty({
     type: String,
-    description: 'The end date and time for participants to join the raffle. Must be in valid date format and after startInscriptionDate.',
+    description:
+      'The end date and time for participants to join the raffle. Must be in valid date format and after startInscriptionDate.',
     required: true,
   })
   @Validate(IsValidDateFormat)
@@ -102,7 +97,8 @@ export class CreateRaffleDto {
 
   @ApiProperty({
     type: String,
-    description: 'The date and time when the raffle will occur. Must be in valid date format and after endInscriptionDate.',
+    description:
+      'The date and time when the raffle will occur. Must be in valid date format and after endInscriptionDate.',
     required: true,
   })
   @IsNotEmpty()
@@ -134,10 +130,5 @@ export class CreateRaffleDto {
   @IsNotEmpty()
   graphicURL: string;
 
-  @ApiProperty({
-    type: Boolean,
-    description: 'A boolean value indicating if the raffle allows participation.',
-    required: true,
-  })
   isPlay: boolean;
 }
