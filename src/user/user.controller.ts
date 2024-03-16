@@ -30,8 +30,11 @@ export class UserController {
   }
 
   @Get()
-  findAll(@Query() paginationDto: PaginationDto) {
-    return this.userService.findAll(paginationDto);
+  findAll(
+    @Query() paginationDto: PaginationDto,
+    @Query('search') search?: string,
+  ) {
+    return this.userService.findAll(paginationDto, search);
   }
 
   @Get(':id')
@@ -52,6 +55,4 @@ export class UserController {
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
   }
-
-
 }

@@ -20,6 +20,7 @@ import {
 import { InsertParticipantDto } from '../dto/insert-participant.dto';
 import { Participant, Raffle } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
+import { PaginationDto, PaginationResultDto } from '../../common/dto';
 
 @ApiTags('Raffles')
 @Controller({
@@ -40,9 +41,10 @@ export class RafflesController {
   @UseInterceptors(TimezoneHeaderInterceptor)
   async findAll(
     @Headers('timezone') timezone: string,
+    @Query() paginationDto: PaginationDto,
     @Query('search') search?: string,
-  ): Promise<Raffle[]> {
-    return this.rafflesService.findAll(timezone, search);
+  ): Promise<PaginationResultDto> {
+    return this.rafflesService.findAll(timezone, paginationDto, search);
   }
 
   @Get(':id')

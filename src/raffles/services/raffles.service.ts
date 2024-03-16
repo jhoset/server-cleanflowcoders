@@ -15,15 +15,18 @@ import { DiscordService } from '../../common/services/discord.service';
 import { ParticipantsService } from './participants.service';
 import { CreateParticipantDto } from '../dto/create-participant.dto';
 import { ConfigService } from '@nestjs/config';
-
+import { PaginationDto, PaginationResultDto } from '../../common/dto';
 @Injectable()
 export class RafflesService {
+  private readonly serverUrl: string;
   constructor(
     private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
     private readonly discordService: DiscordService,
     private readonly participantService: ParticipantsService,
-  ) {}
+  ) {
+    this.serverUrl = this.configService.get<string>('serverUrl');
+  }
   async create({ timezone, ...data }: CreateRaffleDto): Promise<Raffle> {
     const raffle: Raffle = await this.prismaService.raffle.create({ data });
 
@@ -53,7 +56,11 @@ export class RafflesService {
     };
   }
 
-  async findAll(timezone: string, search?: string): Promise<Raffle[]> {
+  async findAll(
+    timezone: string,
+    paginationDto: PaginationDto,
+    search?: string,
+  ): Promise<PaginationResultDto> {
     let whereCondition: Prisma.RaffleWhereInput = {
       isDeleted: false,
     };
@@ -66,9 +73,24 @@ export class RafflesService {
         },
       };
     }
-    const raffles: Raffle[] = await this.prismaService.raffle.findMany({
-      where: whereCondition,
-    });
+    const { offset = 0, limit = 10 } = paginationDto;
+    const [total, raffles] = await Promise.all([
+      this.prismaService.raffle.count({ where: { isDeleted: false } }),
+      this.prismaService.raffle.findMany({
+        where: whereCondition,
+        skip: offset,
+        take: limit,
+      }),
+    ]);
+    const prev =
+      offset - limit >= 0
+        ? `${this.serverUrl}/api/v1/raffles?offset=${offset - limit}&limit=${limit}`
+        : null;
+    const next =
+      offset + limit < total
+        ? `${this.serverUrl}/api/v1/raffles?offset=${offset + limit}&limit=${limit}`
+        : null;
+    const pagination = { total, limit, prev, next };
     const convertedRaffles: Promise<Raffle>[] = raffles.map(
       async (raffle: Raffle) => {
         const { startInscriptionDate, endInscriptionDate, date, ...rest } =
@@ -96,7 +118,8 @@ export class RafflesService {
         };
       },
     );
-    return Promise.all(convertedRaffles);
+    const rafflesTZ: Raffle[] = await Promise.all(convertedRaffles);
+    return new PaginationResultDto(pagination, rafflesTZ);
   }
 
   async findOne(timezone: string, id: number): Promise<Raffle> {
