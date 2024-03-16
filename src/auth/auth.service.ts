@@ -18,7 +18,7 @@ export class AuthService {
 
   async login(loginUserDto: LoginUserDto) {
     const { email, password } = loginUserDto;
-    const existingUser = await this._prisma.user.findUnique({
+    const existingUser = await this._prisma.user.findFirst({
       where: { email, isDeleted: false },
       include: {
         roles: {
