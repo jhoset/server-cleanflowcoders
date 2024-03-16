@@ -8,7 +8,7 @@ import {
 import { UploadService } from './upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
-  ApiBadRequestResponse, ApiBearerAuth,
+  ApiBadRequestResponse, ApiBearerAuth, ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
   ApiOkResponse,
@@ -29,6 +29,18 @@ export class UploadsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Upload Image',
+  })
+  @ApiBody({
+    type: 'file', // Specify that it's a file type
+    schema: {
+      type: 'object',
+      properties: {
+        image: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
   })
   @ApiConsumes('multipart/form-data')
   @ApiCreatedResponse({
