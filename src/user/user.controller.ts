@@ -11,7 +11,6 @@ import {
 import { UserService } from './user.service';
 import {
   ApiBearerAuth,
-  ApiHeader,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
