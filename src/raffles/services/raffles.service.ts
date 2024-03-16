@@ -16,6 +16,14 @@ import { ParticipantsService } from './participants.service';
 import { CreateParticipantDto } from '../dto/create-participant.dto';
 import { ConfigService } from '@nestjs/config';
 import { PaginationDto, PaginationResultDto } from '../../common/dto';
+import {
+  AlreadyParticipatingException,
+  DiscordUserNotFoundException,
+  RaffleAlreadyPlayedException,
+  RaffleDateNotReachedException,
+  RaffleMaxParticipantsException,
+  RaffleRegistrationPeriodException,
+} from '../exceptions';
 @Injectable()
 export class RafflesService {
   private readonly serverUrl: string;
@@ -74,14 +82,12 @@ export class RafflesService {
       };
     }
     const { offset = 0, limit = 10 } = paginationDto;
-    const [total, raffles] = await Promise.all([
-      this.prismaService.raffle.count({ where: { isDeleted: false } }),
-      this.prismaService.raffle.findMany({
-        where: whereCondition,
-        skip: offset,
-        take: limit,
-      }),
-    ]);
+    const raffles: Raffle[] = await this.prismaService.raffle.findMany({
+      where: whereCondition,
+      skip: offset,
+      take: limit,
+    });
+    const total = raffles.length;
     const prev =
       offset - limit >= 0
         ? `${this.serverUrl}/api/v1/raffles?offset=${offset - limit}&limit=${limit}`
@@ -195,8 +201,7 @@ export class RafflesService {
     const raffle: Raffle = await this.findValidRaffleForRegistration(+id);
     const discordUser: GuildMember =
       await this.discordService.getDiscordUser(discordId);
-    if (!discordUser)
-      throw new BadRequestException('User not found in the discord server.');
+    if (!discordUser) throw new DiscordUserNotFoundException();
     try {
       const transaction = await this.prismaService.$transaction(
         async (prisma) => {
@@ -229,9 +234,7 @@ export class RafflesService {
       return transaction;
     } catch (e) {
       if (e.code === 'P2002') {
-        throw new BadRequestException(
-          'You are already participating in this raffle.',
-        );
+        throw new AlreadyParticipatingException();
       }
       console.log(e);
       throw new InternalServerErrorException(e.message);
@@ -294,15 +297,11 @@ export class RafflesService {
       await this.participantService.getNumberOfParticipantsByRaffleId(raffleId);
 
     if (now < startInscriptionDate || now > endInscriptionDate) {
-      throw new BadRequestException(
-        'You cannot register for this raffle as it is not within the registration period.',
-      );
+      throw new RaffleRegistrationPeriodException();
     }
 
     if (numberOfParticipants >= raffle.maxParticipants) {
-      throw new BadRequestException(
-        `You cannot register for this raffle because it has reached the maximum number of participants (${raffle.maxParticipants}).`,
-      );
+      throw new RaffleMaxParticipantsException();
     }
 
     return raffle;
@@ -313,14 +312,10 @@ export class RafflesService {
     const raffle: Raffle = await this.findOne(tzServer, +id);
     const date = new Date(raffle.date);
     if (raffle.isPlay) {
-      throw new BadRequestException(
-        'You cannot play this raffle because it has already been play.',
-      );
+      throw new RaffleAlreadyPlayedException();
     }
     if (now < date) {
-      throw new BadRequestException(
-        'You cannot play this raffle because the raffle date has not yet been reached.',
-      );
+      throw new RaffleDateNotReachedException();
     }
     return raffle;
   }

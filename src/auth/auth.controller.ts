@@ -1,6 +1,12 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { LoginUserDto, RegisterUserDto } from './dto';
 
 @ApiTags('Auth')
@@ -12,6 +18,15 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
+  @ApiOperation({
+    summary: 'User Login',
+  })
+  @ApiOkResponse({
+    description: 'User authenticated successfully.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized. Invalid credentials.',
+  })
   login(@Body() loginUserDto: LoginUserDto) {
     return this.authService.login(loginUserDto);
   }

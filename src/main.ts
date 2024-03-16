@@ -34,6 +34,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addServer(`http://localhost:${process.env.PORT}`, 'Local Environment')
     .addServer(process.env.SERVER_URL, 'Production')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api-docs', app, document);

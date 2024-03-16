@@ -16,7 +16,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { generateUserName } from 'src/helpers';
 import { BcryptAdapter } from 'src/common/adapters/bcrypt.adapter';
-import { Prisma } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -87,19 +87,17 @@ export class UserService {
       };
     }
     const { offset = 0, limit = 10 } = paginationDto;
-    const [total, dbUsers] = await Promise.all([
-      this._prisma.user.count({ where: { isDeleted: false } }),
-      this._prisma.user.findMany({
-        where: whereCondition,
-        include: {
-          roles: {
-            select: { role: true },
-          },
+    const dbUsers: User[] = await this._prisma.user.findMany({
+      where: whereCondition,
+      include: {
+        roles: {
+          select: { role: true },
         },
-        skip: offset,
-        take: limit,
-      }),
-    ]);
+      },
+      skip: offset,
+      take: limit,
+    });
+    const total = dbUsers.length;
     const result = dbUsers.map((user) => UserWithRolesDto.mapFrom(user));
     const prev =
       offset - limit >= 0
