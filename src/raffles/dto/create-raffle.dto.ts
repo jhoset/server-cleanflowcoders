@@ -61,6 +61,7 @@ export class CreateRaffleDto {
   @IsOptional()
   description: string;
 
+  @IsNotEmpty()
   timezone: string;
 
   @ApiProperty({
