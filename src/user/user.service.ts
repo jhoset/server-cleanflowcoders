@@ -87,17 +87,19 @@ export class UserService {
       };
     }
     const { offset = 0, limit = 10 } = paginationDto;
-    const dbUsers: User[] = await this._prisma.user.findMany({
-      where: whereCondition,
-      include: {
-        roles: {
-          select: { role: true },
+    const [total, dbUsers] = await Promise.all([
+      this._prisma.user.count({ where: { isDeleted: false } }),
+      this._prisma.user.findMany({
+        where: whereCondition,
+        include: {
+          roles: {
+            select: { role: true },
+          },
         },
-      },
-      skip: offset,
-      take: limit,
-    });
-    const total = dbUsers.length;
+        skip: offset,
+        take: limit,
+      }),
+    ]);
     const result = dbUsers.map((user) => UserWithRolesDto.mapFrom(user));
     const prev =
       offset - limit >= 0
