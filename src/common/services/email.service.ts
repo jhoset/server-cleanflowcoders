@@ -12,7 +12,7 @@ export class EmailService {
   ) {
     this.from = this.configService.get('MAIL_FROM');
   }
-  async sendForgotPassword(to: string, name: string, link: string) {
+  async sendResetPassword(to: string, name: string, link: string) {
     const htmlContent = `
       <!DOCTYPE html>
       <html lang="en">

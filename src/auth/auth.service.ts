@@ -8,6 +8,7 @@ import { UserWithRolesDto } from 'src/user/dto';
 import { EmailService } from '../common/services/email.service';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -44,15 +45,20 @@ export class AuthService {
     return `This action register`;
   }
 
-  async forgotPassword(email: string) {
-    const clientUrl = this._configService.get('CLIENT_URL');
-    const token = '';
-    const link = `${clientUrl}/restablecer-contraseña?token=${token}`;
+  async resetPassword(email: string): Promise<{ message: string }> {
     const user: User = await this._prisma.user.findFirst({
       where: { email, isDeleted: false },
     });
     if (user) {
-      await this._emailService.sendForgotPassword(email, user.firstName, link);
+      const clientUrl = this._configService.get('CLIENT_URL');
+      const token = randomBytes(32).toString('hex');
+      const link = `${clientUrl}/restablecer-contraseña?email=${email}&token=${token}`;
+
+      await this._prisma.user.update({
+        where: { id: user.id },
+        data: { forgotPasswordToken: token },
+      });
+      await this._emailService.sendResetPassword(email, user.firstName, link);
     }
     return {
       message:

@@ -1,7 +1,6 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, HttpStatus, HttpCode } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
-  ApiBody,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -36,8 +35,15 @@ export class AuthController {
   register(@Body() registerUserDto: RegisterUserDto) {
     return this.authService.register(registerUserDto);
   }
-  @Post('/forgot-password')
-  async forgotPassword(@Body() { email }: ForgotPasswordDto) {
-    return this.authService.forgotPassword(email);
+  @Post('/reset-password')
+  @ApiOperation({
+    summary: 'Reset Password Email',
+  })
+  @ApiOkResponse({ description: 'Password reset email sent successfully' })
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(
+    @Body() { email }: ForgotPasswordDto,
+  ): Promise<{ message: string }> {
+    return this.authService.resetPassword(email);
   }
 }
