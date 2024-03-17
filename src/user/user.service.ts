@@ -183,6 +183,7 @@ export class UserService {
       where: { id: userId },
       data: {
         password: updatePasswordDto.newPassword,
+        forgotPasswordToken: null,
       },
     });
     return true;
