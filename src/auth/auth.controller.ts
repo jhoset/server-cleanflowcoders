@@ -1,13 +1,18 @@
 import { Controller, Post, Body, HttpStatus, HttpCode } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
+  ApiBadRequestResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { LoginUserDto, RegisterUserDto } from './dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import {
+  LoginUserDto,
+  RegisterUserDto,
+  ForgotPasswordDto,
+  ValidateResetPasswordTokenDto,
+} from './dto';
 
 @ApiTags('Auth')
 @Controller({
@@ -45,5 +50,19 @@ export class AuthController {
     @Body() { email }: ForgotPasswordDto,
   ): Promise<{ message: string }> {
     return this.authService.resetPassword(email);
+  }
+  @Post('/valid-reset-password-token')
+  @ApiOperation({
+    summary: 'Valid Reset Password token',
+  })
+  @ApiOkResponse({ description: 'Valid Reset Password token' })
+  @ApiBadRequestResponse({
+    description: 'Invalid email or token',
+  })
+  @HttpCode(HttpStatus.OK)
+  async validateResetPasswordToken(
+    @Body() { email, token }: ValidateResetPasswordTokenDto,
+  ): Promise<{ message: string }> {
+    return this.authService.validateResetPasswordToken(email, token);
   }
 }

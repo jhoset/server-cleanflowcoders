@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginUserDto, RegisterUserDto } from './dto';
@@ -66,6 +70,19 @@ export class AuthService {
         'an email has been sent with instructions to reset your password. ' +
         'Please check your inbox.',
     };
+  }
+  async validateResetPasswordToken(
+    email: string,
+    token: string,
+  ): Promise<{ message: string }> {
+    const user: User = await this._prisma.user.findFirst({
+      where: { email, forgotPasswordToken: token, isDeleted: false },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid email or token');
+    }
+    return { message: 'Token is valid' };
   }
 
   private getJwtToken(payload: JwtPayload) {
