@@ -18,7 +18,7 @@ export class RoleDto {
         type: String,
         description: 'The name of the role. (Optional)',
     })
-    @Optional()
+    @IsOptional()
     @IsString()
     @MinLength(1)
     public name?: string;
