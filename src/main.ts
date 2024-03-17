@@ -15,7 +15,7 @@ async function bootstrap() {
   //? DTO Validation - Trandformation Setup
   app.useGlobalPipes(
     new ValidationPipe({
-      forbidNonWhitelisted: true,
+      // forbidNonWhitelisted: true,
       transform: true,
       whitelist: true,
 
