@@ -82,12 +82,14 @@ export class RafflesService {
       };
     }
     const { offset = 0, limit = 10 } = paginationDto;
-    const raffles: Raffle[] = await this.prismaService.raffle.findMany({
-      where: whereCondition,
-      skip: offset,
-      take: limit,
-    });
-    const total = raffles.length;
+    const [total, raffles] = await Promise.all([
+      await this.prismaService.raffle.count({ where: { isDeleted: false } }),
+      await this.prismaService.raffle.findMany({
+        where: whereCondition,
+        skip: offset,
+        take: limit,
+      }),
+    ]);
     const prev =
       offset - limit >= 0
         ? `${this.serverUrl}/api/v1/raffles?offset=${offset - limit}&limit=${limit}`

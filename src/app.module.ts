@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EnvConfig, JoiValidationSchema } from './config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
@@ -11,6 +11,7 @@ import { RoleModule } from './role/role.module';
 import { RafflesModule } from './raffles/raffles.module';
 import { AuthModule } from './auth/auth.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -22,13 +23,28 @@ import { UploadsModule } from './uploads/uploads.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        transport: {
+          host: configService.get('MAIL_HOST'),
+          port: configService.get('MAIL_PORT'),
+          secure: configService.get<boolean>('MAIL_SECURE'),
+          auth: {
+            user: configService.get('MAIL_USER'),
+            pass: configService.get('MAIL_PASSWORD'),
+          },
+        },
+      }),
+      inject: [ConfigService],
+    }),
     PrismaModule,
     CommonModule,
+    AuthModule,
     UserModule,
     PermissionModule,
     RoleModule,
     RafflesModule,
-    AuthModule,
     UploadsModule,
   ],
   controllers: [],
