@@ -129,7 +129,7 @@ export class UserService {
   async update(id: number, updateUserDto: UpdateUserDto) {
     //TODO: GET CURRENT USER
     const userDb = await this.findOne(id);
-    if (userDb.email !== updateUserDto.email)
+    if (updateUserDto.email && userDb.email !== updateUserDto.email)
       await this.checkNotRegisteredEmail(updateUserDto.email);
     const roleIds = updateUserDto.roles.map(({ id }) => id);
     await this.checkExistingRoles(roleIds);
