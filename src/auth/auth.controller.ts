@@ -8,6 +8,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { LoginUserDto, RegisterUserDto } from './dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @ApiTags('Auth')
 @Controller({
@@ -34,5 +35,9 @@ export class AuthController {
   @Post('register')
   register(@Body() registerUserDto: RegisterUserDto) {
     return this.authService.register(registerUserDto);
+  }
+  @Post('/forgot-password')
+  async forgotPassword(@Body() { email }: ForgotPasswordDto) {
+    return this.authService.forgotPassword(email);
   }
 }
