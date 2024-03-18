@@ -88,6 +88,9 @@ export class RafflesService {
         where: whereCondition,
         skip: offset,
         take: limit,
+        orderBy: {
+          date: 'asc',
+        },
       }),
     ]);
     const prev =
