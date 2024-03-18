@@ -33,7 +33,7 @@ export class RafflesService {
     private readonly configService: ConfigService,
     private readonly discordService: DiscordService,
     private readonly participantService: ParticipantsService,
-    private readonly _raffleNotifyGateway: RaffleNotifyGateway
+    private readonly _raffleNotifyGateway: RaffleNotifyGateway,
   ) {
     this.serverUrl = this.configService.get<string>('serverUrl');
   }
@@ -92,6 +92,13 @@ export class RafflesService {
         take: limit,
         orderBy: {
           date: 'asc',
+        },
+        include: {
+          _count: {
+            select: {
+              participants: true,
+            },
+          },
         },
       }),
     ]);
@@ -286,7 +293,10 @@ export class RafflesService {
           return winner;
         },
       );
-      this._raffleNotifyGateway.server.emit('message', {raffle: raffle.name, winner: winner})
+      this._raffleNotifyGateway.server.emit('message', {
+        raffle: raffle.name,
+        winner: winner,
+      });
       return transaction;
     } catch (error) {
       throw new BadRequestException('An error occurred during the raffle.');
