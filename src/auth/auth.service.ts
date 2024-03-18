@@ -81,13 +81,14 @@ export class AuthService {
 
   async resetPasswordV2(resetPasswordDto: ResetPasswordDto) {
     const {userId, newPassword, tokenToReset} = resetPasswordDto;
-    const payload = await this._jwtService.verifyAsync(tokenToReset);
-    if (!payload) {
-      throw  new UnauthorizedException(`Invalid token to reset password`);
+    try {
+      this._jwtService.verify(tokenToReset);
+    } catch (error) {
+      throw new UnauthorizedException(`Invalid token to reset password`);
     }
-    const { authorizedToResetPassword } = this._jwtService.decode(tokenToReset);
-    if (!authorizedToResetPassword)
-      throw  new UnauthorizedException(`Invalid token to reset password`);
+    const {authorizedToResetPassword} = this._jwtService.decode(tokenToReset);
+    if ( !authorizedToResetPassword ) throw  new UnauthorizedException(`Invalid token to reset password`);
+
     const existingUser = await this._prisma.user.findFirst({
       where: { id: userId, isDeleted: false },
       select: {

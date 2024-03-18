@@ -24,7 +24,7 @@ export class MailerAdapter implements IMailerAdapter {
       const sentInformation = await this.transporter.sendMail({
         to, subject, html, attachments,
       });
-      console.log('>>> Email Sent - Data', sentInformation);
+      console.log(`>>> Email sent to ${to}`);
       return true;
     } catch (error) {
       return false;
