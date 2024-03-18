@@ -5,19 +5,21 @@ export const JoiValidationSchema = Joi.object({
   NODE_ENV: Joi.string().required().valid('development', 'production'),
   PORT: Joi.number().integer().min(1).max(65535).default(3000),
   DATABASE_URL: Joi.string(),
+
   JWT_SECRET: Joi.string().required(),
+
   CLIENT_URL: Joi.string().default('http://localhost:4000/'),
   SERVER_URL: Joi.string().default('http://localhost:3000/'),
   TIMEZONE: JoiTZ.timezone().required(),
+
   BOT_TOKEN_DISCORD: Joi.string().required(),
   SERVER_ID_DISCORD: Joi.string().required(),
+
   CLOUDINARY_CLOUD_NAME: Joi.string().required(),
   CLOUDINARY_API_KEY: Joi.string().required(),
   CLOUDINARY_API_SECRET: Joi.string().required(),
-  MAIL_HOST: Joi.string().required(),
-  MAIL_PORT: Joi.number().port().required(),
-  MAIL_SECURE: Joi.boolean().required(),
-  MAIL_USER: Joi.string().required(),
-  MAIL_PASSWORD: Joi.string().required(),
-  MAIL_FROM: Joi.string().required(),
+
+  MAILER_SERVICE:Joi.string().required(),
+  MAILER_EMAIL:Joi.string().required(),
+  MAILER_SECRET_KEY:Joi.string().required(),
 });

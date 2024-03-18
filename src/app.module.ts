@@ -11,7 +11,6 @@ import { RoleModule } from './role/role.module';
 import { RafflesModule } from './raffles/raffles.module';
 import { AuthModule } from './auth/auth.module';
 import { UploadsModule } from './uploads/uploads.module';
-import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -22,21 +21,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
-    }),
-    MailerModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        transport: {
-          host: configService.get('MAIL_HOST'),
-          port: configService.get('MAIL_PORT'),
-          secure: configService.get<boolean>('MAIL_SECURE'),
-          auth: {
-            user: configService.get('MAIL_USER'),
-            pass: configService.get('MAIL_PASSWORD'),
-          },
-        },
-      }),
-      inject: [ConfigService],
     }),
     PrismaModule,
     CommonModule,
