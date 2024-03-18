@@ -70,7 +70,7 @@ export class AuthService {
     const token = this._jwtService.sign({id: existingUser.id, authorizedToResetPassword: true})
     const resp = await this._mailerAdapter.sendMail({
       to: email,
-      html: generateResetPasswordMailBody(this._configService.get('CLIENT_URL'), '/resetPassword', token),
+      html: generateResetPasswordMailBody(this._configService.get('CLIENT_URL'), '/crear-contrasena', token),
       subject: 'Reset Password',
     })
     if ( !resp ) {
