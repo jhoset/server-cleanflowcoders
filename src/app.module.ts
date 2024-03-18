@@ -11,6 +11,7 @@ import { RoleModule } from './role/role.module';
 import { RafflesModule } from './raffles/raffles.module';
 import { AuthModule } from './auth/auth.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { RaffleNotifyGateway } from './raffle-notify/raffle-notify.gateway';
 
 @Module({
   imports: [
@@ -32,6 +33,6 @@ import { UploadsModule } from './uploads/uploads.module';
     UploadsModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [RaffleNotifyGateway],
 })
 export class AppModule {}

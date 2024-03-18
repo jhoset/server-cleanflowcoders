@@ -6,10 +6,11 @@ import { ParticipantsController } from './controllers/participants.controller';
 import { CommonModule } from '../common/common.module';
 import { ParticipantsService } from './services/participants.service';
 import { AuthModule } from '../auth/auth.module';
+import { RaffleNotifyGateway } from '../raffle-notify/raffle-notify.gateway';
 
 @Module({
   imports: [PrismaModule, CommonModule, AuthModule],
   controllers: [RafflesController, ParticipantsController],
-  providers: [RafflesService, ParticipantsService],
+  providers: [RafflesService, ParticipantsService, RaffleNotifyGateway],
 })
 export class RafflesModule {}
